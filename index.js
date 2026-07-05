@@ -59,7 +59,7 @@ async function run() {
         query.recruiterId = req.query.recruiterId;
       }
       const result = await companyCollection.findOne(query);
-      req.send(result);
+      res.send(result || {});
     });
 
     app.post("/api/companies", async (req, res) => {
