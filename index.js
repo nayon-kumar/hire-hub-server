@@ -100,10 +100,24 @@ async function run() {
     });
 
     // company related apis
+    // app.get("/api/companies", async (req, res) => {
+    //   const cursor = companyCollection.find();
+    //   const result = await cursor.toArray();
+    //   res.send(result);
+    // });
+
+    // inefficient way to join/aggregate collection
     app.get("/api/companies", async (req, res) => {
       const cursor = companyCollection.find();
-      const result = await cursor.toArray();
-      res.send(result);
+      const companies = await cursor.toArray();
+      for (const company of companies) {
+        const filter = {
+          companyId: company._id.toString(),
+        };
+        const jobCount = await jobCollection.countDocuments(filter);
+        company.jobCount = jobCount;
+      }
+      res.send(companies);
     });
 
     app.get("/api/my/companies", async (req, res) => {
