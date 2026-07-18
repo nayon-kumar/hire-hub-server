@@ -13,6 +13,16 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
+const logger = (req, res, next) => {
+  console.log("Logger logged! 2", req.params);
+  next();
+};
+
+const verifyToken = (req, res, next) => {
+  console.log("Headers", req.headers);
+  next();
+};
+
 const uri = process.env.MONGODB_URI;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -107,7 +117,7 @@ async function run() {
     // });
 
     // inefficient way to join/aggregate collection
-    app.get("/api/companies", async (req, res) => {
+    app.get("/api/companies", verifyToken, async (req, res) => {
       const cursor = companyCollection.find();
       const companies = await cursor.toArray();
       for (const company of companies) {
@@ -181,7 +191,7 @@ async function run() {
       res.send(result);
     });
 
-    app.patch("/api/companies/:id", async (req, res) => {
+    app.patch("/api/companies/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const updatedCompany = req.body;
       const filter = {
