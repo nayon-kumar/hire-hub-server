@@ -120,6 +120,47 @@ async function run() {
       res.send(companies);
     });
 
+    // Using join/aggregate collection
+    app.get("/api/companies2", async (req, res) => {
+      const pipeline = [
+        {
+          $skip: 5,
+        },
+      ];
+
+      const cursor = companyCollection.aggregate(pipeline);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.get("/api/stats", async (req, res) => {
+      const pipeline = [
+        {
+          $group: {
+            _id: `$jobType`,
+            count: {
+              $sum: 1,
+            },
+          },
+        },
+        {
+          $project: {
+            jobType: `$_id`,
+            _id: 0,
+            count: 1,
+          },
+        },
+        {
+          $sort: {
+            count: -1,
+          },
+        },
+      ];
+      const cursor = jobCollection.aggregate(pipeline);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     app.get("/api/my/companies", async (req, res) => {
       const query = {};
       if (req.query.recruiterId) {
