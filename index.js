@@ -13,23 +13,6 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-const logger = (req, res, next) => {
-  console.log("Logger logged! 2", req.params);
-  next();
-};
-
-const verifyToken = (req, res, next) => {
-  const authHeader = req.headers?.authorization;
-  if (!authHeader) {
-    return res.status(401).send({ message: "Unauthorized access" });
-  }
-  const token = authHeader.split(" ")[1];
-  if (!token) {
-    return res.status(401).send({ message: "Unauthorized access" });
-  }
-  next();
-};
-
 const uri = process.env.MONGODB_URI;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -53,6 +36,25 @@ async function run() {
     const applicationsCollection = database.collection("applications");
     const planCollection = database.collection("plans");
     const subscriptionCollection = database.collection("subscriptions");
+    const sessionCollection = database.collection("session");
+
+    // Verification Related
+    const verifyToken = async (req, res, next) => {
+      const authHeader = req.headers?.authorization;
+      if (!authHeader) {
+        return res.status(401).send({ message: "Unauthorized access" });
+      }
+      const token = authHeader.split(" ")[1];
+      if (!token) {
+        return res.status(401).send({ message: "Unauthorized access" });
+      }
+
+      const query = { token: token };
+      const session = await sessionCollection.findOne(query);
+      const userId = session.userId;
+      console.log(userId);
+      next();
+    };
 
     app.get("/api/users", async (req, res) => {
       const cursor = usersCollection.find();
