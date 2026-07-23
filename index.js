@@ -52,7 +52,12 @@ async function run() {
       const query = { token: token };
       const session = await sessionCollection.findOne(query);
       const userId = session.userId;
-      console.log(userId);
+      const userQuery = {
+        _id: userId,
+      };
+
+      const user = await usersCollection.findOne(userQuery);
+      console.log(user);
       next();
     };
 
