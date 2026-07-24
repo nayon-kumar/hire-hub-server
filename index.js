@@ -70,8 +70,17 @@ async function run() {
       next();
     };
 
+    // Must be used after verifyToken middleware
     const verifyAdmin = async (req, res, next) => {
       if (req.user?.role !== "admin") {
+        return res.status(403).send({ message: "Forbidden access" });
+      }
+      next();
+    };
+
+    // Must be used after verifyToken middleware
+    const verifyRecruiter = async (req, res, next) => {
+      if (req.user?.role !== "recruiter") {
         return res.status(403).send({ message: "Forbidden access" });
       }
       next();
