@@ -57,7 +57,15 @@ async function run() {
       };
 
       const user = await usersCollection.findOne(userQuery);
-      console.log(user);
+      // Set data in the req object
+      req.user = user;
+      next();
+    };
+
+    const verifySeeker = async (req, res, next) => {
+      if (req.user?.role !== "seeker") {
+        return res.status(403).send({ message: "Forbidden access" });
+      }
       next();
     };
 
@@ -100,18 +108,29 @@ async function run() {
     });
 
     // application related apis
-    app.get("/api/applications", async (req, res) => {
-      const query = {};
-      if (req.query.applicantId) {
-        query.applicantId = req.query.applicantId;
-      }
-      if (req.query.jobId) {
-        query.jobId = req.query.jobId;
-      }
-      const cursor = applicationsCollection.find(query);
-      const result = await cursor.toArray();
-      res.send(result);
-    });
+    app.get(
+      "/api/applications",
+      verifyToken,
+      verifySeeker,
+      async (req, res) => {
+        const query = {};
+        if (req.query.applicantId) {
+          query.applicantId = req.query.applicantId;
+
+          // Check weather asking for user information or someone else
+          console.log(req.user, req.query.applicantId);
+          if (req.user._id.toString() !== req.query.applicantId) {
+            return res.status(403).send({ message: "Forbidden Access" });
+          }
+        }
+        if (req.query.jobId) {
+          query.jobId = req.query.jobId;
+        }
+        const cursor = applicationsCollection.find(query);
+        const result = await cursor.toArray();
+        res.send(result);
+      },
+    );
 
     app.post("/api/applications", async (req, res) => {
       const application = req.body;
