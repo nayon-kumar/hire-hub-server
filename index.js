@@ -62,8 +62,16 @@ async function run() {
       next();
     };
 
+    // Must be used after verifyToken middleware
     const verifySeeker = async (req, res, next) => {
       if (req.user?.role !== "seeker") {
+        return res.status(403).send({ message: "Forbidden access" });
+      }
+      next();
+    };
+
+    const verifyAdmin = async (req, res, next) => {
+      if (req.user?.role !== "admin") {
         return res.status(403).send({ message: "Forbidden access" });
       }
       next();
