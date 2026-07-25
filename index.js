@@ -51,12 +51,20 @@ async function run() {
 
       const query = { token: token };
       const session = await sessionCollection.findOne(query);
+
+      if (!session) {
+        return res.status(401).send({ message: "Unauthorized access" });
+      }
+
       const userId = session.userId;
       const userQuery = {
         _id: userId,
       };
 
       const user = await usersCollection.findOne(userQuery);
+      if (!user) {
+        return res.status(401).send({ message: "Unauthorized access" });
+      }
       // Set data in the req object
       req.user = user;
       next();
