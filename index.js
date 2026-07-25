@@ -94,12 +94,7 @@ async function run() {
       next();
     };
 
-    app.get("/api/users", async (req, res) => {
-      const cursor = usersCollection.find();
-      const result = await cursor.toArray();
-      res.send(result);
-    });
-
+    // Jobs related api
     app.get("/api/jobs", async (req, res) => {
       const query = {};
       if (req.query.companyId) {
