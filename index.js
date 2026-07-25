@@ -167,7 +167,7 @@ async function run() {
     // });
 
     // inefficient way to join/aggregate collection
-    app.get("/api/companies", verifyToken, async (req, res) => {
+    app.get("/api/companies", verifyToken, verifyAdmin, async (req, res) => {
       const cursor = companyCollection.find();
       const companies = await cursor.toArray();
       for (const company of companies) {
